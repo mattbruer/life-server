@@ -1,18 +1,21 @@
-const express = require("express");
-const morgan = require("morgan");
-const app = express();
-module.exports = app;
+const { db } = require("./db");
+const PORT = process.env.PORT || 8000;
+const app = require("./app");
+// const seed = require("../script/seed");
 
-app.use(morgan("dev"));
-app.use(express.json());
+const init = async () => {
+  try {
+    if (process.env.SEED === "true") {
+      await seed();
+    } else {
+      await db.sync();
+      console.log("db connected");
+    }
+    // start listening (and create a 'server' object representing our server)
+    app.listen(PORT, () => console.log(`Mixing it up on port ${PORT}`));
+  } catch (ex) {
+    console.log(ex);
+  }
+};
 
-// app.use("/auth", require("./auth"));
-app.use("/api", require("./api"));
-
-app.use("/", (req, res, next) => {
-  res.send("<p>How did you end up here?</p>");
-});
-
-app.listen(8000, () => {
-  console.log("listening on port 8000");
-});
+init();
